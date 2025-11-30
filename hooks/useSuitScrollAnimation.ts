@@ -33,9 +33,10 @@ const KEYFRAMES = {
   hero: {
     scrollStart: 0.0,
     scrollEnd: 0.2,
-    rotationY: 0.55, // ~31° - elegant 3/4 angle
+    rotationY: 0.35, // More frontal and premium lean
     zoom: 1.15, // Closer, powerful
     cameraY: 1.6, // Chest/torso framing
+    cameraX: 1.5, // Horizontal position - positive moves suit left
     opacity: 1.0,
   },
 
@@ -51,6 +52,7 @@ const KEYFRAMES = {
     rotationY: 1.2, // ~69° - shows lapel detail
     zoom: 1.08, // Slightly zoomed out
     cameraY: 1.65, // Slightly higher
+    cameraX: 1.5, // Horizontal position - positive moves suit left
     opacity: 1.0,
   },
 
@@ -66,6 +68,7 @@ const KEYFRAMES = {
     rotationY: Math.PI * 0.75, // ~135° - side view
     zoom: 0.95, // Zoomed out, smaller silhouette
     cameraY: 1.7, // Slightly higher
+    cameraX: 1.3, // Horizontal position - positive moves suit left
     opacity: 1.0,
   },
 
@@ -81,6 +84,7 @@ const KEYFRAMES = {
     rotationY: 2.0, // ~115° - warm 3/4 returning
     zoom: 1.02, // Slightly closer
     cameraY: 1.75, // Shoulder framing
+    cameraX: 1.2, // Horizontal position - positive moves suit left
     opacity: 1.0,
   },
 
@@ -96,6 +100,7 @@ const KEYFRAMES = {
     rotationY: 2.2, // Stabilizes
     zoom: 0.98, // Slight zoom out as it fades
     cameraY: 1.8, // Final position
+    cameraX: 1.0, // Horizontal position - positive moves suit left
     opacity: 0.0, // Fades out completely
   },
 } as const;
@@ -113,6 +118,8 @@ export type SuitAnimationState = {
   zoom: MotionValue<number>;
   /** Camera Y position - controls vertical framing */
   cameraY: MotionValue<number>;
+  /** Camera X position - controls horizontal framing */
+  cameraX: MotionValue<number>;
   /** Opacity - 1 = visible, 0 = invisible (used in Contact section) */
   opacity: MotionValue<number>;
 };
@@ -139,6 +146,7 @@ function getInterpolationArrays() {
   const rotationValues: number[] = [];
   const zoomValues: number[] = [];
   const cameraYValues: number[] = [];
+  const cameraXValues: number[] = [];
   const opacityValues: number[] = [];
 
   sections.forEach((section, index) => {
@@ -147,6 +155,7 @@ function getInterpolationArrays() {
     rotationValues.push(section.rotationY);
     zoomValues.push(section.zoom);
     cameraYValues.push(section.cameraY);
+    cameraXValues.push(section.cameraX);
     opacityValues.push(section.opacity);
 
     // Add end point only for the last section
@@ -155,6 +164,7 @@ function getInterpolationArrays() {
       rotationValues.push(section.rotationY);
       zoomValues.push(section.zoom);
       cameraYValues.push(section.cameraY);
+      cameraXValues.push(section.cameraX);
       opacityValues.push(section.opacity);
     }
   });
@@ -164,6 +174,7 @@ function getInterpolationArrays() {
     rotationValues,
     zoomValues,
     cameraYValues,
+    cameraXValues,
     opacityValues,
   };
 }
@@ -182,7 +193,7 @@ function getInterpolationArrays() {
  * 
  * @example
  * ```tsx
- * const { rotationY, zoom, cameraY, opacity } = useSuitScrollAnimation();
+ * const { rotationY, zoom, cameraY, cameraX, opacity } = useSuitScrollAnimation();
  * // Pass these to SuitBackgroundScene
  * ```
  */
@@ -230,6 +241,19 @@ export function useSuitScrollAnimation(): SuitAnimationState {
   );
 
   /**
+   * cameraX: Controls horizontal camera position (horizontal framing)
+   * - Positive values = camera moves right, suit appears to move left
+   * - Negative values = camera moves left, suit appears to move right
+   * - Use this to position the suit on the right half of the hero section
+   * - Higher positive values push the suit further to the right side of screen
+   */
+  const cameraX = useTransform(
+    scrollYProgress,
+    interpolation.scrollBreakpoints,
+    interpolation.cameraXValues
+  );
+
+  /**
    * opacity: Controls suit visibility
    * - 1 = fully visible
    * - 0 = invisible (faded into background)
@@ -246,6 +270,7 @@ export function useSuitScrollAnimation(): SuitAnimationState {
     rotationY,
     zoom,
     cameraY,
+    cameraX,
     opacity,
   };
 }

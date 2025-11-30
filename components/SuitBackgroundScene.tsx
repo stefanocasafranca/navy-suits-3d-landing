@@ -28,6 +28,8 @@ export type SuitBackgroundProps = {
   zoom: MotionValue<number>;
   /** Optional: Camera Y position for vertical framing */
   cameraY?: MotionValue<number>;
+  /** Optional: Camera X position for horizontal framing */
+  cameraX?: MotionValue<number>;
   /** Optional: Scene opacity (0-1), defaults to 1 */
   opacity?: MotionValue<number>;
 };
@@ -40,6 +42,7 @@ export function SuitBackgroundScene({
   rotationY,
   zoom,
   cameraY,
+  cameraX,
   opacity,
 }: SuitBackgroundProps) {
   // Default opacity to 1 if not provided
@@ -77,6 +80,7 @@ export function SuitBackgroundScene({
           rotationY={rotationY}
           zoom={zoom}
           cameraY={cameraY}
+          cameraX={cameraX}
         />
       </motion.div>
     </>
