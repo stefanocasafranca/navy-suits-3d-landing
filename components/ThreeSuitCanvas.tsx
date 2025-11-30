@@ -72,6 +72,8 @@ export interface ThreeSuitCanvasProps {
   zoom: MotionValue<number>;
   /** Camera Y position for vertical framing */
   cameraY?: MotionValue<number>;
+  /** Horizontal offset in pixels */
+  offsetXPx?: number;
   /** Additional className for the canvas container */
   className?: string;
 }
@@ -83,6 +85,7 @@ interface SuitModelProps {
 interface CameraControllerProps {
   zoom: MotionValue<number>;
   cameraY: MotionValue<number>;
+  offsetXPx?: number; // horizontal shift in pixels
 }
 
 // ============================================
@@ -163,8 +166,8 @@ function SuitModel({ rotationY }: SuitModelProps) {
 // ============================================
 // Adjusts camera position based on scroll-driven values
 
-function CameraController({ zoom, cameraY }: CameraControllerProps) {
-  const { camera } = useThree();
+function CameraController({ zoom, cameraY, offsetXPx = 0 }: CameraControllerProps) {
+  const { camera, size } = useThree();
   const targetPosition = useRef(new THREE.Vector3(...CAMERA_CONFIG.defaultPosition));
   const [currentZoom, setCurrentZoom] = useState(zoom.get());
   const [currentCameraY, setCurrentCameraY] = useState(cameraY.get());
@@ -178,10 +181,29 @@ function CameraController({ zoom, cameraY }: CameraControllerProps) {
   });
 
   useFrame(() => {
-    // Update target position based on current values
+    // Convert FOV → radians
+    const fovRad = (CAMERA_CONFIG.fov * Math.PI) / 180;
+
+    // Distance based on zoom
     const baseZ = CAMERA_CONFIG.defaultPosition[2];
-    targetPosition.current.z = baseZ / currentZoom;
+    const distance = baseZ / currentZoom;
+
+    // World-space viewport height at this distance
+    const viewportHeightAtDist = 2 * Math.tan(fovRad / 2) * distance;
+
+    // Aspect ratio → world-space width
+    const aspect = size.width / size.height;
+    const viewportWidthAtDist = viewportHeightAtDist * aspect;
+
+    // Convert px → world units
+    const worldOffsetX = (offsetXPx / size.width) * viewportWidthAtDist;
+
+    // Update target position based on current values
+    targetPosition.current.z = distance;
     targetPosition.current.y = currentCameraY;
+
+    // Apply X offset
+    targetPosition.current.x = CAMERA_CONFIG.defaultPosition[0] + worldOffsetX;
 
     // Smoothly interpolate camera position
     camera.position.lerp(targetPosition.current, 0.05);
@@ -262,11 +284,13 @@ function LoadingFallback() {
 function SceneContent({ 
   rotationY, 
   zoom, 
-  cameraY 
+  cameraY,
+  offsetXPx
 }: { 
   rotationY: MotionValue<number>; 
   zoom: MotionValue<number>; 
   cameraY: MotionValue<number>;
+  offsetXPx: number;
 }) {
   return (
     <>
@@ -277,7 +301,7 @@ function SceneContent({
       <Environment preset="city" environmentIntensity={0.3} />
 
       {/* Camera animation controller */}
-      <CameraController zoom={zoom} cameraY={cameraY} />
+      <CameraController zoom={zoom} cameraY={cameraY} offsetXPx={offsetXPx} />
 
       {/* Debug sphere removed - 3D confirmed working */}
 
@@ -297,6 +321,7 @@ export function ThreeSuitCanvas({
   rotationY,
   zoom,
   cameraY,
+  offsetXPx = -400,
   className = "",
 }: ThreeSuitCanvasProps) {
   // Create a proper MotionValue for cameraY if not provided
@@ -326,7 +351,8 @@ export function ThreeSuitCanvas({
         <SceneContent 
           rotationY={rotationY} 
           zoom={zoom} 
-          cameraY={effectiveCameraY} 
+          cameraY={effectiveCameraY}
+          offsetXPx={offsetXPx}
         />
       </Canvas>
     </div>

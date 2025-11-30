@@ -34,7 +34,7 @@ const KEYFRAMES = {
     scrollStart: 0.0,
     scrollEnd: 0.2,
     rotationY: 0.35, // More frontal and premium lean
-    zoom: 1.15, // Closer, powerful
+    zoom: 3.0, // Closer, powerful
     cameraY: 1.6, // Chest/torso framing
     cameraX: 1.5, // Horizontal position - positive moves suit left
     opacity: 1.0,
