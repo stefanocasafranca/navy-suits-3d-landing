@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/* ============================================
+   NAVY SUITS 3D LANDING - DESIGN TOKENS
+   ============================================ */
+
+:root {
+  /* Primary Navy Palette */
+  --navy: #0a1628;
+  --navy-soft: #122035;
+  --navy-light: #1a2d4a;
+  
+  /* Accent Colors */
+  --gold: #c9a962;
+  --gold-muted: #a8925a;
+  --champagne: #f5e6c8;
+  
+  /* Neutrals */
+  --off-white: #f8f6f3;
+  --slate: #64748b;
+  --charcoal: #1e293b;
+  
+  /* Semantic */
+  --background: var(--navy);
+  --foreground: var(--off-white);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-navy: var(--navy);
+  --color-navy-soft: var(--navy-soft);
+  --color-navy-light: var(--navy-light);
+  --color-gold: var(--gold);
+  --color-gold-muted: var(--gold-muted);
+  --color-champagne: var(--champagne);
+  --color-off-white: var(--off-white);
+  --color-slate: var(--slate);
+  --color-charcoal: var(--charcoal);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Global Styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  /* Background is provided by ThreeSuitCanvas - keep transparent to see 3D */
+  background: transparent;
+  color: var(--off-white);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Selection styling */
+::selection {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--navy-soft);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--navy-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-muted);
+}
