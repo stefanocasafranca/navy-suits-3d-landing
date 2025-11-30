@@ -41,6 +41,12 @@ const MODEL_CONFIG = {
   scaleMultiplier: 1.0,
   /** Target size for the model to fit within */
   targetSize: 3,
+  /** Desktop-only horizontal pivot offset (rotation center shift)
+   * Positive = pivot shifts right (model rotates around point further right)
+   * Negative = pivot shifts left (model rotates around point further left)
+   * Only applies on desktop (>=768px), mobile stays centered
+   */
+  desktopPivotOffsetX: 0.5,
 } as const;
 
 // ============================================
@@ -72,6 +78,8 @@ export interface ThreeSuitCanvasProps {
   zoom: MotionValue<number>;
   /** Camera Y position for vertical framing */
   cameraY?: MotionValue<number>;
+  /** Camera X position for horizontal framing */
+  cameraX?: MotionValue<number>;
   /** Horizontal offset in pixels */
   offsetXPx?: number;
   /** Additional className for the canvas container */
@@ -85,6 +93,7 @@ interface SuitModelProps {
 interface CameraControllerProps {
   zoom: MotionValue<number>;
   cameraY: MotionValue<number>;
+  cameraX?: MotionValue<number>;
   offsetXPx?: number; // horizontal shift in pixels
 }
 
@@ -96,12 +105,16 @@ interface CameraControllerProps {
 function SuitModel({ rotationY }: SuitModelProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_CONFIG.modelPath);
+  const { size: viewport } = useThree();
   const [currentRotation, setCurrentRotation] = useState(rotationY.get());
 
   // Listen to rotation changes
   useMotionValueEvent(rotationY, "change", (latest) => {
     setCurrentRotation(latest);
   });
+
+  // Desktop breakpoint: 768px (md breakpoint in Tailwind)
+  const isDesktop = viewport.width >= 768;
 
   // Calculate bounding box and apply auto-scaling/centering
   const processedScene = useMemo(() => {
@@ -128,7 +141,13 @@ function SuitModel({ rotationY }: SuitModelProps) {
     // AUTO-CENTERING
     // ----------------------------------------
     // Center the model at origin, then apply Y offset
-    clonedScene.position.x = -center.x * scale;
+    // Desktop-only pivot offset: shifts rotation center (gumball) horizontally
+    // Positive values shift pivot right (model rotates around a point further right)
+    // Negative values shift pivot left (model rotates around a point further left)
+    // This only affects desktop (>=768px), mobile stays centered
+    const desktopPivotOffsetX = isDesktop ? MODEL_CONFIG.desktopPivotOffsetX : 0;
+    
+    clonedScene.position.x = -center.x * scale + desktopPivotOffsetX;
     clonedScene.position.y = -center.y * scale + MODEL_CONFIG.yOffset;
     clonedScene.position.z = -center.z * scale;
 
@@ -141,7 +160,7 @@ function SuitModel({ rotationY }: SuitModelProps) {
     });
 
     return clonedScene;
-  }, [scene]);
+  }, [scene, isDesktop]);
 
   // Apply rotation in useFrame for smooth updates
   useFrame(() => {
@@ -166,11 +185,14 @@ function SuitModel({ rotationY }: SuitModelProps) {
 // ============================================
 // Adjusts camera position based on scroll-driven values
 
-function CameraController({ zoom, cameraY, offsetXPx = 0 }: CameraControllerProps) {
+function CameraController({ zoom, cameraY, cameraX, offsetXPx = 0 }: CameraControllerProps) {
   const { camera, size } = useThree();
   const targetPosition = useRef(new THREE.Vector3(...CAMERA_CONFIG.defaultPosition));
   const [currentZoom, setCurrentZoom] = useState(zoom.get());
   const [currentCameraY, setCurrentCameraY] = useState(cameraY.get());
+  const defaultCameraX = useMotionValue(CAMERA_CONFIG.defaultPosition[0]);
+  const effectiveCameraX = cameraX || defaultCameraX;
+  const [currentCameraX, setCurrentCameraX] = useState(effectiveCameraX.get());
 
   useMotionValueEvent(zoom, "change", (latestZoom) => {
     setCurrentZoom(latestZoom);
@@ -178,6 +200,10 @@ function CameraController({ zoom, cameraY, offsetXPx = 0 }: CameraControllerProp
 
   useMotionValueEvent(cameraY, "change", (latestY) => {
     setCurrentCameraY(latestY);
+  });
+
+  useMotionValueEvent(effectiveCameraX, "change", (latestX) => {
+    setCurrentCameraX(latestX);
   });
 
   useFrame(() => {
@@ -202,8 +228,11 @@ function CameraController({ zoom, cameraY, offsetXPx = 0 }: CameraControllerProp
     targetPosition.current.z = distance;
     targetPosition.current.y = currentCameraY;
 
-    // Apply X offset
-    targetPosition.current.x = CAMERA_CONFIG.defaultPosition[0] + worldOffsetX;
+    // Apply X position from cameraX (from useSuitScrollAnimation) plus pixel offset
+    // cameraX comes from useSuitScrollAnimation hook
+    // cameraX shifts the framing so the suit can sit on the right half of the screen in Hero
+    // this change is intentional and controlled from the KEYFRAMES
+    targetPosition.current.x = currentCameraX + worldOffsetX;
 
     // Smoothly interpolate camera position
     camera.position.lerp(targetPosition.current, 0.05);
@@ -285,11 +314,13 @@ function SceneContent({
   rotationY, 
   zoom, 
   cameraY,
+  cameraX,
   offsetXPx
 }: { 
   rotationY: MotionValue<number>; 
   zoom: MotionValue<number>; 
   cameraY: MotionValue<number>;
+  cameraX?: MotionValue<number>;
   offsetXPx: number;
 }) {
   return (
@@ -301,7 +332,7 @@ function SceneContent({
       <Environment preset="city" environmentIntensity={0.3} />
 
       {/* Camera animation controller */}
-      <CameraController zoom={zoom} cameraY={cameraY} offsetXPx={offsetXPx} />
+      <CameraController zoom={zoom} cameraY={cameraY} cameraX={cameraX} offsetXPx={offsetXPx} />
 
       {/* Debug sphere removed - 3D confirmed working */}
 
@@ -321,6 +352,7 @@ export function ThreeSuitCanvas({
   rotationY,
   zoom,
   cameraY,
+  cameraX,
   offsetXPx = -400,
   className = "",
 }: ThreeSuitCanvasProps) {
@@ -352,6 +384,7 @@ export function ThreeSuitCanvas({
           rotationY={rotationY} 
           zoom={zoom} 
           cameraY={effectiveCameraY}
+          cameraX={cameraX}
           offsetXPx={offsetXPx}
         />
       </Canvas>

@@ -34,9 +34,9 @@ const KEYFRAMES = {
     scrollStart: 0.0,
     scrollEnd: 0.2,
     rotationY: 0.35, // More frontal and premium lean
-    zoom: 3.0, // Closer, powerful
+    zoom: 10.0, // Closer, powerful
     cameraY: 1.6, // Chest/torso framing
-    cameraX: 1.5, // Horizontal position - positive moves suit left
+    cameraX: 1.9, // Horizontal position - positive moves suit left
     opacity: 1.0,
   },
 
@@ -50,9 +50,9 @@ const KEYFRAMES = {
     scrollStart: 0.2,
     scrollEnd: 0.45,
     rotationY: 1.2, // ~69° - shows lapel detail
-    zoom: 1.08, // Slightly zoomed out
+    zoom: 5.08, // Slightly zoomed out
     cameraY: 1.65, // Slightly higher
-    cameraX: 1.5, // Horizontal position - positive moves suit left
+    cameraX: 1.8, // Horizontal position - positive moves suit left
     opacity: 1.0,
   },
 
@@ -66,9 +66,9 @@ const KEYFRAMES = {
     scrollStart: 0.45,
     scrollEnd: 0.7,
     rotationY: Math.PI * 0.75, // ~135° - side view
-    zoom: 0.95, // Zoomed out, smaller silhouette
+    zoom: 3.95, // Zoomed out, smaller silhouette
     cameraY: 1.7, // Slightly higher
-    cameraX: 1.3, // Horizontal position - positive moves suit left
+    cameraX: 1.5, // Horizontal position - positive moves suit left
     opacity: 1.0,
   },
 
@@ -82,9 +82,9 @@ const KEYFRAMES = {
     scrollStart: 0.7,
     scrollEnd: 0.85,
     rotationY: 2.0, // ~115° - warm 3/4 returning
-    zoom: 1.02, // Slightly closer
+    zoom: 2.02, // Slightly closer
     cameraY: 1.75, // Shoulder framing
-    cameraX: 1.2, // Horizontal position - positive moves suit left
+    cameraX: 1.3, // Horizontal position - positive moves suit left
     opacity: 1.0,
   },
 

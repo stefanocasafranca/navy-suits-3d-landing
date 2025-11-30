@@ -19,7 +19,7 @@ import { useSuitScrollAnimation } from "@/hooks/useSuitScrollAnimation";
 
 export default function Home() {
   // Get scroll-driven animation values
-  const { rotationY, zoom, cameraY, opacity } = useSuitScrollAnimation();
+  const { rotationY, zoom, cameraY, cameraX, opacity } = useSuitScrollAnimation();
 
   return (
     <main className="relative min-h-screen overflow-x-hidden text-off-white">
@@ -33,6 +33,7 @@ export default function Home() {
         rotationY={rotationY}
         zoom={zoom}
         cameraY={cameraY}
+        cameraX={cameraX}
         opacity={opacity}
       />
 
