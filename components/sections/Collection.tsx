@@ -52,16 +52,23 @@ export function Collection() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6 }}
-        className="text-center max-w-2xl mx-auto mb-16"
+        className="relative text-center max-w-2xl mx-auto mb-16"
       >
-        <p className="text-gold font-medium tracking-widest text-sm uppercase mb-4">
+        {/* Mobile-only gradient background for better text contrast */}
+        <div className="absolute inset-0 -mx-6 md:mx-0 -my-8 md:my-0 px-6 md:px-0 py-8 md:py-0 
+                        bg-gradient-to-b from-transparent via-navy/95 to-transparent 
+                        md:bg-transparent backdrop-blur-sm md:backdrop-blur-none 
+                        rounded-2xl md:rounded-none -z-10" 
+             aria-hidden="true" />
+        
+        <p className="text-gold font-medium tracking-widest text-sm uppercase mb-4 relative z-0">
           The Collection
         </p>
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-off-white mb-6">
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-off-white mb-6 relative z-0">
           Curated
           <span className="font-semibold"> Excellence</span>
         </h2>
-        <p className="text-lg text-slate leading-relaxed">
+        <p className="text-lg text-slate md:text-slate leading-relaxed relative z-0">
           Each piece in our collection represents the pinnacle of tailoring, 
           designed for those who demand nothing less than extraordinary.
         </p>
@@ -76,7 +83,8 @@ export function Collection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="group relative bg-navy-soft/80 backdrop-blur-sm border border-off-white/10 
+            className="group relative bg-navy-soft/95 md:bg-navy-soft/80 backdrop-blur-md md:backdrop-blur-sm 
+                       border border-off-white/20 md:border-off-white/10 
                        rounded-2xl p-8 transition-all duration-300 active:scale-[0.98]"
           >
             {/* Card inner glow effect */}
