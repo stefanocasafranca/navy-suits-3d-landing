@@ -7,6 +7,9 @@
  * 
  * The Canvas is created ONCE and never unmounted during scroll.
  * All animation is driven by MotionValues from useSuitScrollAnimation.
+ * 
+ * IMPORTANT: The navy background is always visible. Only the 3D model
+ * fades out in the Contact section, not the background color.
  */
 
 "use client";
@@ -44,25 +47,38 @@ export function SuitBackgroundScene({
   const effectiveOpacity = opacity || defaultOpacity;
 
   return (
-    /**
-     * Fixed positioning ensures the suit stays in place during scroll.
-     * - inset-0: covers entire viewport
-     * - -z-10: sits behind all content (content uses z-10 or higher)
-     * - pointer-events-none: allows clicking through to content
-     * 
-     * motion.div allows us to animate opacity smoothly
-     */
-    <motion.div
-      className="fixed inset-0 -z-10 pointer-events-none"
-      style={{ opacity: effectiveOpacity }}
-      aria-hidden="true"
-    >
-      <ThreeSuitCanvas
-        rotationY={rotationY}
-        zoom={zoom}
-        cameraY={cameraY}
+    <>
+      {/**
+       * Layer 1: Static Navy Background
+       * This NEVER fades - always visible to maintain the navy theme.
+       * Sits at -z-20 (behind the 3D canvas)
+       */}
+      <div
+        className="fixed inset-0 -z-20 pointer-events-none bg-[#0a1628]"
+        aria-hidden="true"
       />
-    </motion.div>
+
+      {/**
+       * Layer 2: 3D Canvas with Opacity Animation
+       * Fixed positioning ensures the suit stays in place during scroll.
+       * - inset-0: covers entire viewport
+       * - -z-10: sits behind content but above the navy background
+       * - pointer-events-none: allows clicking through to content
+       * 
+       * motion.div animates opacity - fades OUT the 3D model in Contact section
+       * but the navy background (Layer 1) remains visible.
+       */}
+      <motion.div
+        className="fixed inset-0 -z-10 pointer-events-none"
+        style={{ opacity: effectiveOpacity }}
+        aria-hidden="true"
+      >
+        <ThreeSuitCanvas
+          rotationY={rotationY}
+          zoom={zoom}
+          cameraY={cameraY}
+        />
+      </motion.div>
+    </>
   );
 }
-
